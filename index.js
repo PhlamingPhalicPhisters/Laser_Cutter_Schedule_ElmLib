@@ -59,7 +59,7 @@ $(document).ready(function () {
     var dayArray = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     var todayD = dibsdate.getDay();
-    for(var dayGen = 0; dayGen < 6; dayGen++) {
+    for(var dayGen = 0; dayGen < 7; dayGen++) {
         var theDay = (todayD + dayGen) % 7;
 
         var todaycheck = new Date();
