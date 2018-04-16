@@ -8,8 +8,6 @@ $(document).ready(function () {
         return this.getTimezoneOffset() < this.stdTimezoneOffset();
     }
 
-
-
     var codeLineObj = {};
     var dibsdate = new Date();
 
@@ -57,13 +55,15 @@ $(document).ready(function () {
 
     //start loop here
     var dayArray = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
+    var openCloseTimes = {"Sunday" : [13, [16, 30]], "Monday": [0, [0,0]], "Tuesday" : [12, [20, 30]], "Wednesday": [12, [17, 0]], "Thursday": [12, [20, 30]], "Friday": [12, [20, 30]], "Saturday": [9, [16, 30]]};
+    var openCloseTimes2 = {"Sunday" : [13, 16.5], "Monday": [0, 0], "Tuesday" : [12, 20.5], "Wednesday": [12, 17], "Thursday": [12, 20.5], "Friday": [12, 20.5], "Saturday": [9, 16.5]};
     var todayD = dibsdate.getDay();
     for(var dayGen = 0; dayGen < 7; dayGen++) {
         var theDay = (todayD + dayGen) % 7;
 
         var todaycheck = new Date();
         todaycheck.setDate(todaycheck.getDate() + dayGen);
+        //console.log(todaycheck);
         if (todaycheck.dst()) {
             var savingstime = "-05:00";
         }
@@ -72,8 +72,9 @@ $(document).ready(function () {
         }
         var dibsdate = new Date();
         dibsdate.setDate(dibsdate.getDate() + dayGen);
+        //console.log(dibsdate);
 
-        closetime = new Date(dibsdate.getFullYear(),dibsdate.getMonth(),dibsdate.getDate(),20,30,0,0);
+        closetime = new Date(dibsdate.getFullYear(),dibsdate.getMonth(),dibsdate.getDate(),openCloseTimes[dayArray[theDay]][1][0],openCloseTimes[dayArray[theDay]][1][1],0,0);
 
         var myObject = {};
 
@@ -85,7 +86,6 @@ $(document).ready(function () {
                 myObject[i] = new Date(dibsdate.getFullYear(), dibsdate.getMonth(), dibsdate.getDate(), Math.floor(i), 30, 0, 0);
             }
         }
-
 
         var xmarker = "OPEN";
         var prexmarker = "";
@@ -102,18 +102,42 @@ $(document).ready(function () {
         var bookcolor = "DCDCDC";
 
 
-        var xdibsdate = new Date(dibsdate.getFullYear(), dibsdate.getMonth(), dibsdate.getDate(), 9, 0, 0, 0);
+        var xdibsdate = new Date(dibsdate.getFullYear(), dibsdate.getMonth(), dibsdate.getDate(), openCloseTimes[dayArray[theDay]][0], 0, 0, 0);
 
         $.getJSON(dibsdateurlnow,
             function processData(jsonData) {
                 sortJsonArrayByProperty(jsonData, 'attributes.StartTime');
-                xdibsdate = new Date(dibsdate.getFullYear(), dibsdate.getMonth(), dibsdate.getDate(), 9, 0, 0, 0);
+                xdibsdate = new Date(dibsdate.getFullYear(), dibsdate.getMonth(), dibsdate.getDate(), openCloseTimes[dayArray[theDay]][0], 0, 0, 0);
 
                 codelinestart = codelinestart + "<TD align=center>" + dayArray[theDay] + "</TD>";
-                var timedate;
+
+                //paint closed
+                var xmarker1 = "<font size=-1>Closed</font>";
+                var prexmarker1 = "";
+                var postmarker1 = "";
+                var theMarkUp = "<TD align=center style='border-width:0' BGCOLOR=" + "#3e4f6b" + ">" + prexmarker1 + xmarker1 + postmarker1 + "</TD>";
+                var mUl1 = theMarkUp.length;
+                for(var j = 9; j < 20.5; j = j + 0.5){
+                    codeLineObj[j] = codeLineObj[j] + theMarkUp;
+                }
+
+
+                //paint open
+                var prexmarker2 = '<A style="color: #459f9a;" HREF="https://elmhurstmakerspace.evanced.info/dibs?space=' + "3" + '">';
+                var postmarker2 = "</A>";
+                var xmarker2 = "OPEN";
+                var theMarkUp2 = "<TD align=center>" + prexmarker2 + xmarker2 + postmarker2 + "</TD>";
+                var mUl2 = theMarkUp2.length;
+                for(var j = openCloseTimes2[dayArray[theDay]][0]; j < openCloseTimes2[dayArray[theDay]][1]; j = j + 0.5){
+                    var objLen = codeLineObj[j].length;
+                    objLen -= mUl1;
+                    codeLineObj[j] = codeLineObj[j].slice(0,objLen);
+                    codeLineObj[j] += theMarkUp2;
+                }
 
                 // Loop through each data block
                 $.each(jsonData, function (object, objectData) {
+
                     var whichroom = objectData.RoomID;
                     prexmarker = '<A style="color: #459f9a;" HREF="https://elmhurstmakerspace.evanced.info/dibs?space=' + whichroom + '">';
                     postmarker = "</A>";
@@ -125,52 +149,29 @@ $(document).ready(function () {
                         colorcount = 1;
                         bookcolor = "DCDCDC";
                     }
-                    xmarker = "OPEN";
-                    var timestring = objectData.StartTime;
-                    timedate = new Date(timestring + savingstime);
-                    while (timedate - xdibsdate > 0) {
-                        for (var i = 9; i < 20.5; i = i + 0.5) {
-                            if (xdibsdate - myObject[i] == 0) {
-                                codeLineObj[i] = codeLineObj[i] + "<TD align=center>" + prexmarker + xmarker + postmarker + "</TD>";
-                            }
-                        }
-                        xdibsdate.setMinutes(xdibsdate.getMinutes() + 30);
-                    }
 
                     xmarker = "<font size=-1>*Booked</font>";
                     prexmarker = "";
                     postmarker = "";
-                    var timestring = objectData.EndTime;
-                    timedate = new Date(timestring + savingstime);
-                    while (timedate - xdibsdate > 0) {
-                        for (var i = 9; i < 20.5; i = i + 0.5) {
-                            if (xdibsdate - myObject[i] == 0) {
-                                codeLineObj[i] = codeLineObj[i] + "<TD align=center style='border-width:0' BGCOLOR=" + bookcolor + ">" + prexmarker + xmarker + postmarker + "</TD>";
-                                xmarker = "<font color=" + bookcolor + ">.</font>";
-                            }
-                        }
-                        xdibsdate.setMinutes(xdibsdate.getMinutes() + 30);
+                    var timestringOpen = objectData.StartTime;
+                    var timestringEnd = objectData.EndTime;
+                    var timedateOpen = new Date(timestringOpen + savingstime);
+                    var timedateClose = new Date(timestringEnd + savingstime);
+                    var conv = {0: 0, 30: .5};
+                    var openHourMin = timedateOpen.getHours() + conv[timedateOpen.getMinutes()];
+                    var closeHourMin = timedateClose.getHours() + conv[timedateClose.getMinutes()];
+                    var theMarkUp3 = "<TD align=center style='border-width:0' BGCOLOR=" + bookcolor + ">" + prexmarker + xmarker + postmarker + "</TD>";
+                    for(;openHourMin < closeHourMin ; openHourMin += .5){
+                        var objLen = codeLineObj[openHourMin].length;
+                        objLen -= mUl2;
+                        codeLineObj[openHourMin] = codeLineObj[openHourMin].slice(0,objLen);
+                        codeLineObj[openHourMin] += theMarkUp3;
+                        xmarker = "<font color=" + bookcolor + ">.</font>";
                     }
                 });
-
-                xmarker = "OPEN";
-                prexmarker = '<A style="color: #459f9a;" HREF="https://elmhurstmakerspace.evanced.info/dibs?space=3">';
-                postmarker = "</A>";
-                while (closetime - xdibsdate > 0) {
-                    for (var i = 9; i < 20.5; i = i + 0.5) {
-                        if (xdibsdate - myObject[i] == 0) {
-                            codeLineObj[i] = codeLineObj[i] + "<TD align=center>" + prexmarker + xmarker + postmarker + "</TD>";
-                        }
-                    }
-                    xdibsdate.setMinutes(xdibsdate.getMinutes() + 30);
-                }
             });
-
         }
     //end the loop here
-
-
-
 
     var fullcodeline = codelinestart;
 
