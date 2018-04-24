@@ -12,7 +12,7 @@ $(document).ready(function () { //function used to correctly set timezone
     var dibsdate = new Date();  //Starting date (today) used for the beginning of the loop and throughout the entire program
 
     var closetime = new Date(dibsdate.getFullYear(),dibsdate.getMonth(),dibsdate.getDate(),20,30,0,0);  //close time of the Makery (statically set to 8:30 despite the day)
-    var codelinestart ="<TABLE BORDER=1 cellspacing=0 cellpadding=5><TFOOT>*Reservations are held for 15 minutes after start time.</TFOOT><TR><TD>. </TD>"; //The top of the table
+    var codelinestart ="<TABLE BORDER=1 cellspacing=0 cellpadding=5><TFOOT>*Reservations are held for 15 minutes after start time.</TFOOT><TR><TD></TD>"; //The top of the table
 
     for(var i = 9; i < 20.5; i = i + 0.5){  //This loop is going to create the left hand side of the table that displays all of the possible booking times
             var string = Math.floor(i).toString();
@@ -115,7 +115,6 @@ $(document).ready(function () { //function used to correctly set timezone
                     codeLineObj[j] = codeLineObj[j] + theMarkUp;
                 }
 
-
                 //The variables and loop "paint over" that these slots are 'OPEN' and fix a hyperlink to book this time(depending on the opening and closing times of this day)
                 var prexmarker2 = '<A style="color: #459f9a;" HREF="https://elmhurstmakerspace.evanced.info/dibs?space=' + "3" + '">';
                 var postmarker2 = "</A>";
@@ -123,10 +122,14 @@ $(document).ready(function () { //function used to correctly set timezone
                 var theMarkUp2 = "<TD align=center>" + prexmarker2 + xmarker2 + postmarker2 + "</TD>";
                 var mUl2 = theMarkUp2.length;   //This is used to keep the length of the string being added to this codeLineObj just in case it needs to be erased and replaced if this time is indeed booked
                 for(var j = openCloseTimes2[dayArray[theDay]][0]; j < openCloseTimes2[dayArray[theDay]][1]; j = j + 0.5){
-                    var objLen = codeLineObj[j].length;
-                    objLen -= mUl1; //This time is open, so 'slice' off the last part that was added to this codeLineObj in order to add it as an "OPEN" slot
-                    codeLineObj[j] = codeLineObj[j].slice(0,objLen);
-                    codeLineObj[j] += theMarkUp2;
+                    if(openCloseTimes2[dayArray[theDay]][1] == 20.5 && j > 15.5 && j < 18.5){ //If this is a day where Makery open until 9, then the laser cutter is closed from 4-6PM
+                    }
+                    else {
+                        var objLen = codeLineObj[j].length;
+                        objLen -= mUl1; //This time is open, so 'slice' off the last part that was added to this codeLineObj in order to add it as an "OPEN" slot
+                        codeLineObj[j] = codeLineObj[j].slice(0, objLen);
+                        codeLineObj[j] += theMarkUp2;
+                    }
                 }
 
                 // Loop through each data block in order to place in the table if this time is booked
@@ -156,11 +159,16 @@ $(document).ready(function () { //function used to correctly set timezone
                     var closeHourMin = timedateClose.getHours() + conv[timedateClose.getMinutes()]; //create the correct end time for the booking end
                     var theMarkUp3 = "<TD align=center style='border-width:0' BGCOLOR=" + bookcolor + ">" + prexmarker + xmarker + postmarker + "</TD>";
                     for(;openHourMin < closeHourMin ; openHourMin += .5){   //loop that correctly goes through and adds the booked slot into the table
-                        var objLen = codeLineObj[openHourMin].length;
-                        objLen -= mUl2; //Erase and slice the "OPEN" from the codeLineObj because this slot is not open
-                        codeLineObj[openHourMin] = codeLineObj[openHourMin].slice(0,objLen);
-                        codeLineObj[openHourMin] += theMarkUp3;
-                        xmarker = "<font color=" + bookcolor + ">.</font>";
+                        if(openCloseTimes2[dayArray[theDay]][1] == 20.5 && openHourMin > 15.5 && openHourMin < 18.5){   //If this is a day where Makery open until 9, then the laser cutter is closed from 4-6PM
+                        }
+                        else {
+                            var objLen = codeLineObj[openHourMin].length;
+                            objLen -= mUl2; //Erase and slice the "OPEN" from the codeLineObj because this slot is not open
+                            codeLineObj[openHourMin] = codeLineObj[openHourMin].slice(0, objLen);
+                            codeLineObj[openHourMin] += theMarkUp3;
+                            theMarkUp3 = "<TD align=center style='border-width:0' BGCOLOR=" + bookcolor + ">" + prexmarker + postmarker + "</TD>";
+                            xmarker = "<font color=" + bookcolor + "></font>";
+                        }
                     }
                 });
             });
@@ -174,7 +182,7 @@ $(document).ready(function () { //function used to correctly set timezone
         }
 
     fullcodeline = fullcodeline + "</TR>" + codelineend;    //End the table
-    $('#roomBlock1').append(fullcodeline);  //Find the DIV with ID stated and add the table to that DIV
+    $('#laserCutterRooms').append(fullcodeline);  //Find the DIV with ID stated and add the table to that DIV
 
     $.ajaxSetup({   //synchronize with jQuery now that the code is done
         async: true
