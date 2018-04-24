@@ -182,7 +182,7 @@ $(document).ready(function () { //function used to correctly set timezone
         }
 
     fullcodeline = fullcodeline + "</TR>" + codelineend;    //End the table
-    $('#laserCutterRooms').append(fullcodeline);  //Find the DIV with ID stated and add the table to that DIV
+    $('#laserCutterSched').append(fullcodeline);  //Find the DIV with ID stated and add the table to that DIV
 
     $.ajaxSetup({   //synchronize with jQuery now that the code is done
         async: true
