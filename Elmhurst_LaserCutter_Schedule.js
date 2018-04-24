@@ -1,5 +1,12 @@
-$(document).ready(function () { //function used to correctly set timezone
-    Date.prototype.stdTimezoneOffset = function() {
+/*
+* Property of: Elmhurst Public Libray, Elmhurst, Illinois.
+* Date: 2018-04-24.
+* Author: George Nelson, ADS Staff.
+* Purpose: This is a scheduling system built for the Elmhurst Public Library Makery Laser Cutter.
+* */
+
+$(document).ready(function () {
+    Date.prototype.stdTimezoneOffset = function() { //function used to correctly set timezone
         var jan = new Date(this.getFullYear(), 0, 1);
         var jul = new Date(this.getFullYear(), 6, 1);
         return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
